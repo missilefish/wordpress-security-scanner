@@ -17,21 +17,20 @@ foreach ($files as $filename) {
 	$line_number = 0;
 	#print "processing: $path/$filename\n";
 	$handle = fopen("$path/$filename", "r");
-	if ($handle) {
+	if ($handle && $filename !=  'security_scan.php') {
 		while (($line = fgets($handle)) !== false) {
 			// process the line read.
 			$line_number++;
 			$patterns = array("source=base64_decode", "eval.*base64_decode", "POST.*execgate"); 
 			$regex = '/(' .implode('|', $patterns) .')/i'; 
 			if (preg_match($regex, $line)) {  
-				$_line = substr($line, 0, 45);
+				$_line = substr($line, 0, 25);
 				print <<<ALERT
-				
-####################################################################################################################################
-#           ALERT               ALERT                      ALERT                  ALERT                                            #
-####################################################################################################################################
-$path/$filename
->> $_line
+		####################################################################################################################################
+		#           ALERT               ALERT                      ALERT                  ALERT                                            #
+		####################################################################################################################################
+		$path/$filename
+		>> $_line
 
 ALERT;
 				$alarms["$path/$filename"][$line_number] = $line;
@@ -47,6 +46,8 @@ ALERT;
 
 			}
 		}
+	} elseif($filename ==  'security_scan.php') {
+		#ignore ourselves
 	} else {
 		// error opening the file.
 		print "OPEN FAIL: $path/$filename\n\n";
