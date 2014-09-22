@@ -17,7 +17,7 @@ foreach ($files as $filename) {
 	$line_number = 0;
 	#print "processing: $path/$filename\n";
 	$handle = fopen("$path/$filename", "r");
-	if ($handle) {
+	if ($handle && $filename !==  'security_scan.php') {
 		while (($line = fgets($handle)) !== false) {
 			// process the line read.
 			$line_number++;
