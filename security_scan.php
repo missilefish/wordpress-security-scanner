@@ -47,6 +47,9 @@ ALERT;
 
 			}
 		}
+	} elseif($filename ==  'security_scan.php') {
+                #ignore ourselves
+
 	} else {
 		// error opening the file.
 		print "OPEN FAIL: $path/$filename\n\n";
