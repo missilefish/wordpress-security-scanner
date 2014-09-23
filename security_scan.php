@@ -3,10 +3,9 @@
 Author: Adam Lyons
 
 */
+$time_start = microtime(true);
 
-$_filename = __FILE__;
-$break = explode('/', $_filename);
-$_filename = $break[count($break) - 1]; 
+$_filename = 'security_scan.php';
 $alarms = array();
 
 $email_encoded = 'YWRhbUBtaXNzaWxlZmlzaC5jb20';
@@ -38,7 +37,9 @@ foreach ($files as $filename) {
 	$total++;
 	$line_number = 0;
 	#print "processing: $path/$filename\n";
-	if($filename !==  $_filename) {
+	$break = explode('/', $_filename);
+	$c_filename = $break[count($break) - 1]; 
+	if($c_filename !==  $_filename) {
 		$handle = fopen("$path/$filename", "r");
 		if ($handle) {
 			while (($line = fgets($handle)) !== false) {
@@ -47,7 +48,7 @@ foreach ($files as $filename) {
 				$patterns = array("source=base64_decode", "eval.*base64_decode", "POST.*execgate"); 
 				$regex = '/(' .implode('|', $patterns) .')/i'; 
 				if (preg_match($regex, $line)) {  
-					$_line = substr($line, 0, 25);
+					$_line = substr($line, 0, 50);
 					print <<<ALERT
 
 ####################################################################################################################################
@@ -57,7 +58,7 @@ $path/$filename
 >> $_line
 
 ALERT;
-					$alarms["$path/$filename"][$line_number] = $line;
+					$alarms["$path/$filename"]["$filename"][$line_number] = $line;
 
 					if($interactive) {
 						echo "Disable file by CHMOD? (y/n)\n";
@@ -80,19 +81,24 @@ ALERT;
 	}
 }
 
-print "\nScan complete ($total Files)\n\n\n";
+$time_end = microtime(true);
+$execution_time = ($time_end - $time_start)/60;
 
-	$date = date('l jS \of F Y h:i:s A');
-	if($alarms) {
-		print "The following alarms occured:\n";
-		#print_r($alarms);
-		$body = "Alarms detected on $date\n\n" . print_r($alarms, true);
-	} else {
-		$body = "No alarms detected: $date";
-	}
+$msg = 'Total Execution Time:'.$execution_time.' Mins';
 
-	$to = $email; $subject = "Wordpress Security Scanner ($_filename) Security Report";  
-	if (mail($to, $subject, $body)) {   echo("Email successfully sent!\n$body\n");  } else {   echo("Email delivery failed.\n");  }	
+$msg .= "\nScan complete ($total Files)\n\n\n";
+
+$date = date('l jS \of F Y h:i:s A');
+if($alarms) {
+	#print "The following alarms occured:\n";
+	#print_r($alarms);
+	$body = "$msg\n\nAlarms detected on $date\n\n" . print_r($alarms, true);
+} else {
+		$body = "$msg\n\nNo alarms detected: $date";
+}
+
+$to = $email; $subject = "Wordpress Security Scanner ($_filename) Security Report";  
+if (mail($to, $subject, $body)) {   echo("Email successfully sent!\n$body\n");  } else {   echo("Email delivery failed.\n");  }	
 
 
 
