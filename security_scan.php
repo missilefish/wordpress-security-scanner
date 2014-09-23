@@ -37,7 +37,7 @@ foreach ($files as $filename) {
 	$total++;
 	$line_number = 0;
 	#print "processing: $path/$filename\n";
-	$break = explode('/', $_filename);
+	$break = explode('/', $filename);
 	$c_filename = $break[count($break) - 1]; 
 	if($c_filename !==  $_filename) {
 		$handle = fopen("$path/$filename", "r");
