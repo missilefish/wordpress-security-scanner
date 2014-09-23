@@ -4,8 +4,30 @@ Author: Adam Lyons
 
 */
 
+$_filename = __FILE__;
+$break = explode('/', $_filename);
+$_filename = $break[count($break) - 1]; 
+$alarms = array();
+
+$email_encoded = 'YWRhbUBtaXNzaWxlZmlzaC5jb20';
+$email = base64_decode(strtr($email_encoded, '-_', '+/'));
 $total = 0;
-$path = '/var/www/virtual';
+
+if (defined('STDIN') && isset($argv[1])) {
+	$interactive = $argv[1];
+} elseif(isset($_GET['prompt'])) { 
+	$interactive = $_GET['prompt'];
+} else {
+	$interactive = '';
+}
+
+if($interactive) {
+	print "WARNING: This script is NOT running interactive, only an email report will be generated\n\n";
+} else {
+	print "Alerts will cause a pause in script execution, to disable run with ./$_filename prompt=1\n\n";
+}
+
+
 $path = getcwd();
 print "Getting file list...\n";
 $files = recursiveDirList($path);
@@ -16,47 +38,61 @@ foreach ($files as $filename) {
 	$total++;
 	$line_number = 0;
 	#print "processing: $path/$filename\n";
-	$handle = fopen("$path/$filename", "r");
-	if ($handle && $filename !=  'security_scan.php') {
-		while (($line = fgets($handle)) !== false) {
-			// process the line read.
-			$line_number++;
-			$patterns = array("source=base64_decode", "eval.*base64_decode", "POST.*execgate"); 
-			$regex = '/(' .implode('|', $patterns) .')/i'; 
-			if (preg_match($regex, $line)) {  
-				$_line = substr($line, 0, 25);
-				print <<<ALERT
-		####################################################################################################################################
-		#           ALERT               ALERT                      ALERT                  ALERT                                            #
-		####################################################################################################################################
-		$path/$filename
-		>> $_line
+	if($filename !==  $_filename) {
+		$handle = fopen("$path/$filename", "r");
+		if ($handle) {
+			while (($line = fgets($handle)) !== false) {
+				// process the line read.
+				$line_number++;
+				$patterns = array("source=base64_decode", "eval.*base64_decode", "POST.*execgate"); 
+				$regex = '/(' .implode('|', $patterns) .')/i'; 
+				if (preg_match($regex, $line)) {  
+					$_line = substr($line, 0, 25);
+					print <<<ALERT
+
+####################################################################################################################################
+#           ALERT               ALERT                      ALERT                  ALERT                                            #
+####################################################################################################################################
+$path/$filename
+>> $_line
 
 ALERT;
-				$alarms["$path/$filename"][$line_number] = $line;
+					$alarms["$path/$filename"][$line_number] = $line;
 
-				echo "Disable file by CHMOD? (y/n)\n";
-				$_handle = fopen ("php://stdin","r");
-				$input = fgets($_handle);
-				if(trim($input) == 'y'){
-					chmod("$path/$filename", 0000);
+					if($interactive) {
+						echo "Disable file by CHMOD? (y/n)\n";
+						$_handle = fopen ("php://stdin","r");
+						$input = fgets($_handle);
+						if(trim($input) == 'y'){
+							chmod("$path/$filename", 0000);
+						}
+						echo "Thank you, continuing...\n";
+					}
+					fclose($_handle);
+
 				}
-				echo "Thank you, continuing...\n";
-				fclose($_handle);
-
 			}
-		}
-	} elseif($filename ==  'security_scan.php') {
-		#ignore ourselves
-	} else {
-		// error opening the file.
-		print "OPEN FAIL: $path/$filename\n\n";
-	} 
-	fclose($handle);
+			fclose($handle);
+		} else {
+			// error opening the file.
+			print "OPEN FAIL: $path/$filename\n\n";
+		} 
+	}
 }
 
-print "\nScan complete ($total Files)\n";
-#print_r($alarms);
+print "\nScan complete ($total Files)\n\n\n";
+
+	$date = date('l jS \of F Y h:i:s A');
+	if($alarms) {
+		print "The following alarms occured:\n";
+		print_r($alarms);
+		$body = "Alarms detected on $date\n\n" . print_r($alarms, true);
+	} else {
+		$body = "No alarms detected: $date";
+	}
+
+	$to = $email; $subject = "Wordpress Security Scanner ($_filename) Security Report";  
+	if (mail($to, $subject, $body)) {   echo("Email successfully sent!\n$body\n");  } else {   echo("Email delivery failed.\n");  }	
 
 
 
