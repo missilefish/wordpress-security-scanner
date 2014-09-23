@@ -93,12 +93,12 @@ if($alarms) {
 	#print "The following alarms occured:\n";
 	#print_r($alarms);
 	$body = "$msg\n\nAlarms detected on $date\n\n" . print_r($alarms, true);
+	$to = $email; $subject = "Wordpress Security Scanner ($_filename) Security Report";  
+	if (mail($to, $subject, $body)) {   echo("Email successfully sent!\n$body\n");  } else {   echo("Email delivery failed.\n");  }	
 } else {
-		$body = "$msg\n\nNo alarms detected: $date";
+	#$body = "$msg\n\nNo alarms detected: $date";
 }
 
-$to = $email; $subject = "Wordpress Security Scanner ($_filename) Security Report";  
-if (mail($to, $subject, $body)) {   echo("Email successfully sent!\n$body\n");  } else {   echo("Email delivery failed.\n");  }	
 
 
 
