@@ -22,9 +22,9 @@ if (defined('STDIN') && isset($argv[1])) {
 }
 
 if($interactive) {
-	print "WARNING: This script is NOT running interactive, only an email report will be generated\n\n";
+	print "Alerts will cause a pause in script execution, to disable run without any arguments\n\n";
 } else {
-	print "Alerts will cause a pause in script execution, to disable run with ./$_filename prompt=1\n\n";
+	print "WARNING: This script is NOT running interactive, only an email report will be generated. To enable run with ./$_filename prompt=1\n\n";
 }
 
 
@@ -67,8 +67,8 @@ ALERT;
 							chmod("$path/$filename", 0000);
 						}
 						echo "Thank you, continuing...\n";
+						fclose($_handle);
 					}
-					fclose($_handle);
 
 				}
 			}
@@ -85,7 +85,7 @@ print "\nScan complete ($total Files)\n\n\n";
 	$date = date('l jS \of F Y h:i:s A');
 	if($alarms) {
 		print "The following alarms occured:\n";
-		print_r($alarms);
+		#print_r($alarms);
 		$body = "Alarms detected on $date\n\n" . print_r($alarms, true);
 	} else {
 		$body = "No alarms detected: $date";
