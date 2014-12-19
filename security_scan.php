@@ -48,30 +48,18 @@ foreach ($files as $filename) {
 				$patterns = array("source=base64_decode", "eval.*base64_decode", "POST.*execgate"); 
 				$regex = '/(' .implode('|', $patterns) .')/i'; 
 				if (preg_match($regex, $line)) {  
-					$_line = substr($line, 0, 50);
-					print <<<ALERT
-
-####################################################################################################################################
-#           ALERT               ALERT                      ALERT                  ALERT                                            #
-####################################################################################################################################
-$path/$filename
->> $_line
-
-ALERT;
-					$alarms["$path/$filename"]["$filename"][$line_number] = $line;
-
-					if($interactive) {
-						echo "Disable file by CHMOD? (y/n)\n";
-						$_handle = fopen ("php://stdin","r");
-						$input = fgets($_handle);
-						if(trim($input) == 'y'){
-							chmod("$path/$filename", 0000);
-						}
-						echo "Thank you, continuing...\n";
-						fclose($_handle);
-					}
-
+					interact($line, $path, $filename, $line_number);
 				}
+
+				preg_match_all('/(\'[a-z0-9]\')\=>(\'[a-z0-9]\')/i', $line, $foo) . "\n";
+
+				if(count($foo[1]) == count($foo[2])) {
+					if(count($foo[1]) > 5) {
+						print "Detected ROT13 Suspect\n" . "instances: " . count($foo[1]) . "\n";
+						interact($line, $path, $filename, $line_number);
+					}
+				}
+
 			}
 			fclose($handle);
 		} else {
@@ -99,7 +87,31 @@ if($alarms) {
 	#$body = "$msg\n\nNo alarms detected: $date";
 }
 
+function interact($line, $path, $filename, $line_number) {
+	global $interactive;
+	$_line = substr($line, 0, 50);
+	print <<<ALERT
 
+####################################################################################################################################
+#           ALERT               ALERT                      ALERT                  ALERT                                            #
+####################################################################################################################################
+$path/$filename
+>> $_line
+
+ALERT;
+	$alarms["$path/$filename"]["$filename"][$line_number] = $line;
+
+	if($interactive) {
+		echo "Disable file by CHMOD? (y/n)\n";
+		$_handle = fopen ("php://stdin","r");
+		$input = fgets($_handle);
+		if(trim($input) == 'y'){
+			chmod("$path/$filename", 0000);
+		}
+		echo "Thank you, continuing...\n";
+		fclose($_handle);
+	}
+}
 
 
 function recursiveDirList($dir, $prefix = '') {
