@@ -45,7 +45,7 @@ foreach ($files as $filename) {
 			while (($line = fgets($handle)) !== false) {
 				// process the line read.
 				$line_number++;
-				$patterns = array("source=base64_decode", "eval.*base64_decode", "POST.*execgate"); 
+				$patterns = array("source=base64_decode", "eval.*base64_decode", "POST.*execgate","return.*base64_decode" );	
 				$regex = '/(' .implode('|', $patterns) .')/i'; 
 				if (preg_match($regex, $line)) {  
 					$_line = substr($line, 0, 50);
