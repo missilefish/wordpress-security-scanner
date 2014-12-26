@@ -45,7 +45,18 @@ foreach ($files as $filename) {
 			while (($line = fgets($handle)) !== false) {
 				// process the line read.
 				$line_number++;
-				$patterns = array("source=base64_decode", "eval.*base64_decode", "POST.*execgate"); 
+				$patterns = array("source=base64_decode", 
+					"eval.*base64_decode", 
+					"POST.*execgate",
+					"touch\(\"wp-optionstmp.php\"",
+					"file_put_contents.*wp-options",
+					"touch.*wp-options\.php",
+					"@move_uploaded_file\(",
+					"code_inject_sape",
+					"xmlrpc.php\".*mktime\(",
+					"jquery.php\".*mktime\(",
+					"exec\(.*find\ "
+				); 
 				$regex = '/(' .implode('|', $patterns) .')/i'; 
 				if (preg_match($regex, $line)) {  
 					interact($line, $path, $filename, $line_number);
