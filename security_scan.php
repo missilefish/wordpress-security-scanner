@@ -45,6 +45,7 @@ foreach ($files as $filename) {
 			while (($line = fgets($handle)) !== false) {
 				// process the line read.
 				$line_number++;
+				// break}if(T.invalid){for(S.setContent(x),f=S.getNod
 				$patterns = array("source=base64_decode", 
 					"eval.*base64_decode", 
 					"POST.*execgate",
@@ -58,8 +59,8 @@ foreach ($files as $filename) {
 					"exec\(.*find\ "
 				); 
 				$regex = '/(' .implode('|', $patterns) .')/i'; 
-				if (preg_match($regex, $line)) {  
-					interact($line, $path, $filename, $line_number);
+				if (preg_match($regex, $line, $matches)) {  
+					interact($line, $path, $filename, $line_number, $matches);
 				}
 
 				preg_match_all('/(\'[a-z0-9]\')\=>(\'[a-z0-9]\')/i', $line, $foo) . "\n";
@@ -67,7 +68,7 @@ foreach ($files as $filename) {
 				if(count($foo[1]) == count($foo[2])) {
 					if(count($foo[1]) > 5) {
 						print "Detected ROT13 Suspect\n" . "instances: " . count($foo[1]) . "\n";
-						interact($line, $path, $filename, $line_number);
+						interact($line, $path, $filename, $line_number, null);
 					}
 				}
 
@@ -98,13 +99,15 @@ if($alarms) {
 	#$body = "$msg\n\nNo alarms detected: $date";
 }
 
-function interact($line, $path, $filename, $line_number) {
+function interact($line, $path, $filename, $line_number, $matches) {
 	global $interactive;
 	$_line = substr($line, 0, 50);
+	$_matches = print_r($matches, true);
 	print <<<ALERT
 
 ####################################################################################################################################
 #           ALERT               ALERT                      ALERT                  ALERT                                            #
+$_matches
 ####################################################################################################################################
 $path/$filename
 >> $_line
