@@ -56,7 +56,8 @@ foreach ($files as $filename) {
 					"code_inject_sape",
 					"xmlrpc.php\".*mktime\(",
 					"jquery.php\".*mktime\(",
-					"exec\(.*find\ "
+					"exec\(\"find\ ",
+					"exec\(\'find\ "
 				); 
 				$regex = '/(' .implode('|', $patterns) .')/i'; 
 				if (preg_match($regex, $line, $matches)) {  
