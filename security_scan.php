@@ -1,24 +1,22 @@
 <?php
 /*
 Author: Adam Lyons
+Source: https://github.com/missilefish/wordpress-security-scanner
 
+The source updates often, be sure to check the project page on Git from time to time. 
 */
 $time_start = microtime(true);
 
 $_filename = 'security_scan.php';
 $alarms = array();
 
+/* if you want to get your own notifications just update $email='your@dot.com' */
+// If you detect any new patterns please share on GIT 
 $email_encoded = 'YWRhbUBtaXNzaWxlZmlzaC5jb20';
 $email = base64_decode(strtr($email_encoded, '-_', '+/'));
 $total = 0;
 
-if (defined('STDIN') && isset($argv[1])) {
-	$interactive = $argv[1];
-} elseif(isset($_GET['prompt'])) { 
-	$interactive = $_GET['prompt'];
-} else {
-	$interactive = '';
-}
+if (defined('STDIN') && isset($argv[1])) { $interactive = $argv[1]; } elseif(isset($_GET['prompt'])) { $interactive = $_GET['prompt']; } else { $interactive = ''; }
 
 if($interactive) {
 	print "Alerts will cause a pause in script execution, to disable run without any arguments\n\n";
@@ -45,7 +43,6 @@ foreach ($files as $filename) {
 			while (($line = fgets($handle)) !== false) {
 				// process the line read.
 				$line_number++;
-				// break}if(T.invalid){for(S.setContent(x),f=S.getNod
 				$patterns = array("source=base64_decode", 
 					"eval.*base64_decode", 
 					"POST.*execgate",
