@@ -57,8 +57,15 @@ foreach ($files as $filename) {
 					"xmlrpc.php\".*mktime\(",
 					"jquery.php\".*mktime\(",
 					"exec\(\"find\ ",
-					"exec\(\'find\ "
+					"exec\(\'find\ ",
+					"assert\((\"|\')e(\"|\')\.(\"|\')v(\"|\')",
+					"\(gzinflate\(str_rot13\(base64_decode",
+					"preg_replace\((\"|\')\/\.\*\/e(\"|\')\,(\"|\')",
+					"\\\x62\\\\x61\\\\x73\\\\x65\\\\x36\\\\x34\\\\x5f\\\\x64\\\\x65\\\\x63\\\\x6f\\\\x64\\\\x65",
+					"\\\\x65\\\\x76\\\\x61\\\\x6C\\\\x28\\\\x67\\\\x7A\\\\x69\\\\x6E\\\\x66\\\\x6C\\\\x61\\\\x74\\\\x65\\\\x28\\\\x62\\\\x61\\\\x73\\\\x65\\\\x36\\\\x34\\\\x5F\\\\x64\\\\x65\\\\x63\\\\x6F\\\\x64\\\\x65\\\\x28"
 				); 
+
+
 				$regex = '/(' .implode('|', $patterns) .')/i'; 
 				if (preg_match($regex, $line, $matches)) {  
 					interact($line, $path, $filename, $line_number, $matches);
