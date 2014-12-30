@@ -9,6 +9,8 @@ $time_start = microtime(true);
 
 $_filename = 'security_scan.php';
 $alarms = array();
+$interactive = 0;
+$force = 0;
 
 /* if you want to get your own notifications just update $email='your@dot.com' */
 // If you detect any new patterns please share on GIT 
