@@ -14,14 +14,46 @@ $alarms = array();
 // If you detect any new patterns please share on GIT 
 $email_encoded = 'YWRhbUBtaXNzaWxlZmlzaC5jb20';
 $email = base64_decode(strtr($email_encoded, '-_', '+/'));
-$total = 0;
+$total = 0; $force=0;
 
-if (defined('STDIN') && isset($argv[1])) { $interactive = $argv[1]; } elseif(isset($_GET['prompt'])) { $interactive = $_GET['prompt']; } else { $interactive = ''; }
+// Script example.php
+$shortopts  = "";
+$shortopts .= "f::";  // Required value
+$shortopts .= "p::"; // Optional value
+$shortopts .= "h"; // These options do not accept values
+
+$longopts  = array(
+    "force::",     // Required value
+    "prompt::",    // Optional value
+    "help",        // No value
+);
+$opts = getopt($shortopts, $longopts);
+var_dump($opts);
+
+foreach (array_keys($opts) as $opt) switch ($opt) {
+  case 'force':
+    // Do something with s parameter
+    $force= $opts['force'];
+    break;
+  case 'prompt':
+    // Do something with s parameter
+    $interactive= $opts['prompt'];
+    break;
+  case 'h':
+    //print_help_message();
+    exit(1);
+}
+
+print "Int: $interactive\nForce: $force\n\n";
 
 if($interactive) {
 	print "Alerts will cause a pause in script execution, to disable run without any arguments\n\n";
 } else {
 	print "WARNING: This script is NOT running interactive, only an email report will be generated. To enable run with ./$_filename prompt=1\n\n";
+}
+
+if($force) {
+	print "WARNING: FORCE ACTIVE - no prompting for CHMOD 0000 operations\n\n\n";
 }
 
 
@@ -106,6 +138,7 @@ if($alarms) {
 
 function interact($line, $path, $filename, $line_number, $matches) {
 	global $interactive;
+	global $force;
 	$_line = substr($line, 0, 50);
 	$_matches = print_r($matches, true);
 	print <<<ALERT
@@ -113,9 +146,9 @@ function interact($line, $path, $filename, $line_number, $matches) {
 ####################################################################################################################################
 #           ALERT               ALERT                      ALERT                  ALERT                                            #
 $_matches
-####################################################################################################################################
 $path/$filename
 >> $_line
+####################################################################################################################################
 
 ALERT;
 	$alarms["$path/$filename"]["$filename"][$line_number] = $line;
@@ -129,6 +162,10 @@ ALERT;
 		}
 		echo "Thank you, continuing...\n";
 		fclose($_handle);
+	}
+	if($force) {
+		chmod("$path/$filename", 0000);
+		echo "$path/$filename updated to 0000, continuing...\n";
 	}
 }
 
