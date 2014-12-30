@@ -30,7 +30,6 @@ $longopts  = array(
     "help",        // No value
 );
 $opts = getopt($shortopts, $longopts);
-var_dump($opts);
 
 foreach (array_keys($opts) as $opt) switch ($opt) {
   case 'force':
@@ -141,6 +140,7 @@ if($alarms) {
 function interact($line, $path, $filename, $line_number, $matches) {
 	global $interactive;
 	global $force;
+	global $alarms;
 	$_line = substr($line, 0, 50);
 	$_matches = print_r($matches, true);
 	print <<<ALERT
