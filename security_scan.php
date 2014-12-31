@@ -82,7 +82,7 @@ foreach ($files as $filename) {
 					"touch\(\"wp-optionstmp.php\"",
 					"file_put_contents.*wp-options",
 					"touch.*wp-options\.php",
-					"@move_uploaded_file\(",
+					//"@move_uploaded_file\(",
 					"code_inject_sape",
 					"xmlrpc.php\".*mktime\(",
 					"jquery.php\".*mktime\(",
@@ -103,10 +103,14 @@ foreach ($files as $filename) {
 
 				preg_match_all('/(\'[a-z0-9]\')\=>(\'[a-z0-9]\')/i', $line, $foo) . "\n";
 
-				if(count($foo[1]) == count($foo[2])) {
-					if(count($foo[1]) > 5) {
-						print "Detected ROT13 Suspect\n" . "instances: " . count($foo[1]) . "\n";
-						interact($line, $path, $filename, $line_number, null);
+				//if($foo[1] == $foo[2]) {
+				if(isset($foo[1][0])) {
+					if($foo[1][0] != $foo[2][0]) {
+						if(count($foo[1]) > 5) {
+							//print_r($foo);
+							print "Detected ROT13 Suspect\n" . "instances: " . count($foo[1]) . "\n";
+							interact($line, $path, $filename, $line_number, null);
+						}
 					}
 				}
 
