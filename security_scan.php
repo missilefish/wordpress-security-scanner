@@ -5,6 +5,14 @@ Source: https://github.com/missilefish/wordpress-security-scanner
 
 The source updates often, be sure to check the project page on Git from time to time. 
 */
+
+
+$uid = 'root';
+$gid = 'root';
+
+$wpuid = 'nginx';
+$wpgid = 'nginx';
+
 $time_start = microtime(true);
 
 $_filename = 'security_scan.php';
@@ -61,7 +69,7 @@ if($force) {
 $path = getcwd();
 print "Getting file list...\n";
 $files = recursiveDirList($path);
-print "Scanning files...";
+print "\nScanning files...";
 
 foreach ($files as $filename) {
 	print ".";
@@ -83,6 +91,7 @@ foreach ($files as $filename) {
 					"file_put_contents.*wp-options",
 					"touch.*wp-options\.php",
 					//"@move_uploaded_file\(",
+					//"if\ (@move_uploaded_file($files['tmp_name'][$i], $path))
 					"code_inject_sape",
 					"xmlrpc.php\".*mktime\(",
 					"jquery.php\".*mktime\(",
@@ -123,12 +132,16 @@ foreach ($files as $filename) {
 	}
 }
 
+print "\n";
+
 $time_end = microtime(true);
 $execution_time = ($time_end - $time_start)/60;
 
 $msg = 'Total Execution Time:'.$execution_time.' Mins';
 
 $msg .= "\nScan complete ($total Files)\n\n\n";
+
+print "$msg";
 
 $date = date('l jS \of F Y h:i:s A');
 if($alarms) {
@@ -141,12 +154,58 @@ if($alarms) {
 	#$body = "$msg\n\nNo alarms detected: $date";
 }
 
+function check_perm($file) {
+	global $uid;
+	global $gid;
+	global $wpuid;
+	global $wpgid;
+
+	if(substr(sprintf('%o', fileperms($file)), -4) !== '0000') {
+		if(is_dir($file)) {
+			if(preg_match('/wp\-content/', $file)) {
+				//print "\nWEB ACCESS DIR CHECK PERM: $file\n";
+				chown($file, $wpuid); 
+				chgrp($file, $wpgid);	
+				chmod($file, 0755);
+			} else {
+				//print "\nLOCK DIR CHECK PERM: $file\n";
+				chown($file, $uid); 
+				chgrp($file, $gid);	
+				chmod($file, 0755);
+			}
+		} elseif(is_file($file)) {
+			if(preg_match('/wp\-content/', $file)) {
+				//print "\nWEB ACCESS FILE CHECK PERM: $file\n";
+				chown($file, $uid); 
+				chgrp($file, $wpgid);	
+				chmod($file, 0664);
+			} elseif($file == "wp-config.php") {
+				chown($typepath, $uid); 
+				chgrp($typepath, $gid);	
+				chmod($typepath, 0600);
+			} else {
+				//print "\nLOCK FILE CHECK PERM: $file\n";
+				chown($file, $uid); 
+				chgrp($file, $gid);	
+				chmod($file, 0644);
+			}
+		} else {
+			print "WARNING: UNHANDLED FILE TYPE: $file\n\n\n";
+		}
+	} else {
+		print "DETECTED DISABLED FILE ($file), NOT RESETTING PERMS\n";
+	}
+
+}
+
 function interact($line, $path, $filename, $line_number, $matches) {
 	global $interactive;
 	global $force;
 	global $alarms;
 	$_line = substr($line, 0, 50);
 	$_matches = print_r($matches, true);
+
+
 	print <<<ALERT
 
 ####################################################################################################################################
@@ -173,6 +232,7 @@ ALERT;
 		chmod("$path/$filename", 0000);
 		echo "$path/$filename updated to 0000, continuing...\n";
 	}
+
 }
 
 
@@ -181,8 +241,9 @@ function recursiveDirList($dir, $prefix = '') {
 	$result = array();
 
 	foreach (glob("$dir/*", GLOB_MARK) as $f) {
+		#print "\nDEBUG: $f\n";
+		check_perm($f);
 		if (substr($f, -1) === '/') {
-			#print "\n$f";
 			$result = array_merge($result, recursiveDirList($f, $prefix . basename($f) . '/'));
 		} else {
 			$patterns = array("php$", "js$"); 
