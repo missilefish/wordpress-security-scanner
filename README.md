@@ -59,3 +59,10 @@ NOT IMPORTANT:
 	This is a work in progress, and I update things at will based on my own observations. The email alerts help me find things often, and I update patterns and things. So, if you find an issue, or have any comment, I will see it so long as you email me or comment. I am open to collaboration on this script.
 
 
+ADDITIONAL GOALS AND WHAT THIS ROADMAP WON'T BE PLANNING:
+	
+	I don't want anyone to need anything but PHP
+	No MySQL databases required
+	grab, run, eval - decide/cry/deal
+
+
