@@ -4,6 +4,7 @@ wordpress security scanner
 A PHP script to check for hacked files in a Wordpress installation. The script will read every line in every file from the origin in which you run it (the script, recursively), by default will set file and directory permissions to a relatively safe level, and alert you to issues. In the event a file is flagging, the default solution is to set the mode to '0000'. This mode makes the file useless, however it is NOT a complete solution to your problem. The intention with this script is to provide automated resolutions depending on how you implement it under CRON. The file will only be turned to mode 000 if you use --force=1 flag. 
 
 CURRENT USAGE OPTIONS:
+
 	--force=1 
 		This will NOT prompt you if you want to set the mode of a file to 0000
 	--prompt=1
@@ -14,9 +15,16 @@ CURRENT USAGE OPTIONS:
 		Make the entire installation capable of doing automatic updates
 
 WARNING:
+
 	If you run this script without a single change, your files WILL be updated with new ownership/group information, as well as chmod updates. 
-	No matter what, as of 1/6/15, your permissions will update with a LOCKDOWN policy on all files under your executing location. This will disable WP from automatic updates.
+	No matter what, as of 1/6/15, your permissions on files will update with a LOCKDOWN policy on all files under your executing location. This will disable WP from automatic updates.
 	WP automatic updates run under the USER of every file, your web process user needs to match the script variables to run best. 
+
+ROADMAP:
+	
+	file and directory permissions will be under a usage switch only, not by default. File content inspections only by default, with an alert. 
+
+	
 
 This script should be run as SUPERUSER in the root crontab unless you are awesome with perms and multiuser stuff, if you are then you can help me make this better ;).
 
