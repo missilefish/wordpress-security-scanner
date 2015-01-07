@@ -196,7 +196,7 @@ function check_perm($file) {
 
 	if(substr(sprintf('%o', fileperms($file)), -4) !== '0000') {
 		if(is_dir($file)) {
-			if(preg_match('/wp\-content\/uploads|cache$/', $file)) {
+			if(preg_match('/wp\-content\/uploads|cache/', $file)) {
 				check_perm_owner($file, $wpuid);
 				check_perm_grp($file, $wpgid);
 				check_perm_bits($file, '0755'); 
@@ -206,7 +206,7 @@ function check_perm($file) {
 				check_perm_bits($file, '0755'); 
 			}
 		} elseif(is_file($file)) {
-			if(preg_match('/wp\-content\/uploads/|cache', $file)) {
+			if(preg_match('/wp\-content\/uploads|cache/', $file)) {
 				check_perm_owner($file, $wpuid);
 				check_perm_grp($file, $wpgid);
 				check_perm_bits($file, '0660'); 
