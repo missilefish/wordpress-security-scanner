@@ -1,9 +1,11 @@
-wordpress-security-scanner
+wordpress security scanner
 ==========================
 
-A PHP script to check for hacked files in a Wordpress installation. The script 
+A PHP script to check for hacked files in a Wordpress installation. The script will read every line in every file from the origin in which you run it (the script, recursively), by default will set file and directory permissions to a relatively safe level, and alert you to issues. In the event a file is flagging, the default solution is to set the mode to '0000'. This mode makes the file useless, however it is NOT a complete solution to your problem. The intention with this script is to provide automated resolutions depending on how you implement it under CRON. 
 
-This script is designed for system admins and webmasters. If you don't have a basic understanding of Worpdress and PHP you might want to move along.
+This script should be run as SUPERUSER.
+
+This script is designed for system admins and webmasters who deal with multiple virtual hosts who have Wordpress installs. If you don't have a basic understanding of Worpdress and PHP you might want to move along.
 
 If you have not moved along, then this script is a pulic share of how I manage my hundreds of virtual hosts which server WP. 
 
