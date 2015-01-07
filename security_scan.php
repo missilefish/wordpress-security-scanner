@@ -7,11 +7,8 @@ The source updates often, be sure to check the project page on Git from time to 
 */
 
 
-$uid = 'root';
-$gid = 'root';
 
-$wpuid = 'nginx';
-$wpgid = 'nginx';
+
 
 $time_start = microtime(true);
 
@@ -19,9 +16,11 @@ $_filename = 'security_scan.php';
 $alarms = array();
 $interactive = 0;
 $force = 0;
+$lock = 0;
+$unlock = 0;
 
 /* if you want to get your own notifications just update $email='your@dot.com' */
-// If you detect any new patterns please share on GIT 
+// If you detect any new patterns please share on GIT.
 $email_encoded = 'YWRhbUBtaXNzaWxlZmlzaC5jb20';
 $email = base64_decode(strtr($email_encoded, '-_', '+/'));
 $total = 0; $force=0;
@@ -30,22 +29,33 @@ $total = 0; $force=0;
 $shortopts  = "";
 $shortopts .= "f::";  // Required value
 $shortopts .= "p::"; // Optional value
+$shortopts .= "l::"; // Optional value
+$shortopts .= "u::"; // Optional value
 $shortopts .= "h"; // These options do not accept values
 
 $longopts  = array(
     "force::",     // Required value
     "prompt::",    // Optional value
+    "lock::",    // Optional value
+    "unlock::",    // Optional value
     "help",        // No value
 );
 $opts = getopt($shortopts, $longopts);
 
 foreach (array_keys($opts) as $opt) switch ($opt) {
+  case 'perms':
+    $perms= $opts['perms'];
+    break;
   case 'force':
-    // Do something with s parameter
     $force= $opts['force'];
     break;
+  case 'lock':
+    $lock = $opts['lock'];
+    break;
+  case 'unlock':
+    $unlock = $opts['unlock'];
+    break;
   case 'prompt':
-    // Do something with s parameter
     $interactive= $opts['prompt'];
     break;
   case 'h':
@@ -53,12 +63,36 @@ foreach (array_keys($opts) as $opt) switch ($opt) {
     exit(1);
 }
 
-print "Int: $interactive\nForce: $force\n\n";
+
+if($lock) {
+	/* CHANGE THESE TO YOUR PERMISSION/OWNER PREFS FOR LOCKDOWN */
+	$uid = 'root';
+	$gid = 'root';
+	$wpuid = 'nginx';
+	$wpgid = 'nginx';
+} elseif($unlock) {
+	/* CHANGE THESE TO YOUR PERMISSION/OWNER PREFS ALLOWING AUTO-UPDATE*/
+	$uid = 'nginx';
+	$gid = 'root';
+	$wpuid = 'nginx';
+	$wpgid = 'nginx';
+} else {
+	// DEFAULT
+	$uid = 'root';
+	$gid = 'root';
+	$wpuid = 'nginx';
+	$wpgid = 'nginx';
+}
+
+
+print "\nUsage: run with --force=1 or --prompt=1 to enable an interactive reporting (prompt) option or run with force to disable any detected files without prompt. Default options will only report and email findings, IN ADDITION, the default run will LOCKDOWN the file permissions.\n";
+print "\nWarning: This script will change file permissions to the settings above for all files and directories \n         /wp-content and below will be writable by your web process $wpuid:$wpgid and all other files will be owned and only writable by $uid:$gid.\n";
+print "\nSETTINGS: -- Interactive: $interactive Force: $force Lockdown: $lock Unlock: $unlock\n\n";
 
 if($interactive) {
 	print "Alerts will cause a pause in script execution, to disable run without any arguments\n\n";
 } else {
-	print "WARNING: This script is NOT running interactive, only an email report will be generated. To enable run with ./$_filename prompt=1\n\n";
+	print "WARNING: This script is NOT running interactive, only an email report will be generated. To enable run with ./$_filename --prompt=1\n\n";
 }
 
 if($force) {
@@ -67,7 +101,7 @@ if($force) {
 
 
 $path = getcwd();
-print "Getting file list...\n";
+print "Getting file list and updating permissions...\n";
 $files = recursiveDirList($path);
 print "\nScanning files...";
 
@@ -162,32 +196,28 @@ function check_perm($file) {
 
 	if(substr(sprintf('%o', fileperms($file)), -4) !== '0000') {
 		if(is_dir($file)) {
-			if(preg_match('/wp\-content/', $file)) {
-				//print "\nWEB ACCESS DIR CHECK PERM: $file\n";
-				chown($file, $wpuid); 
-				chgrp($file, $wpgid);	
-				chmod($file, 0755);
+			if(preg_match('/wp\-content\/uploads/', $file)) {
+				check_perm_owner($file, $wpuid);
+				check_perm_grp($file, $wpgid);
+				check_perm_bits($file, '0755'); 
 			} else {
-				//print "\nLOCK DIR CHECK PERM: $file\n";
-				chown($file, $uid); 
-				chgrp($file, $gid);	
-				chmod($file, 0755);
+				check_perm_owner($file, $uid);
+				check_perm_grp($file, $gid);
+				check_perm_bits($file, '0755'); 
 			}
 		} elseif(is_file($file)) {
-			if(preg_match('/wp\-content/', $file)) {
-				//print "\nWEB ACCESS FILE CHECK PERM: $file\n";
-				chown($file, $uid); 
-				chgrp($file, $wpgid);	
-				chmod($file, 0664);
-			} elseif($file == "wp-config.php") {
-				chown($typepath, $uid); 
-				chgrp($typepath, $gid);	
-				chmod($typepath, 0600);
+			if(preg_match('/wp\-content\/uploads/', $file)) {
+				check_perm_owner($file, $wpuid);
+				check_perm_grp($file, $wpgid);
+				check_perm_bits($file, '0660'); 
+			} elseif(preg_match('/wp-config.php$/', $file)) { 
+				check_perm_owner($file, $uid);
+				check_perm_grp($file, $wpgid);
+				check_perm_bits($file, '0640'); 
 			} else {
-				//print "\nLOCK FILE CHECK PERM: $file\n";
-				chown($file, $uid); 
-				chgrp($file, $gid);	
-				chmod($file, 0644);
+				check_perm_owner($file, $uid);
+				check_perm_grp($file, $gid);
+				check_perm_bits($file, '0644'); 
 			}
 		} else {
 			print "WARNING: UNHANDLED FILE TYPE: $file\n\n\n";
@@ -196,6 +226,45 @@ function check_perm($file) {
 		print "DETECTED DISABLED FILE ($file), NOT RESETTING PERMS\n";
 	}
 
+}
+
+function check_perm_grp($file, $gid) {
+	global $alarms;
+	clearstatcache();
+	$own = (posix_getgrgid(filegroup($file)));
+	if($own['name'] !== $gid) {
+		print "Incorrect permission group detected: $file != $gid -- updating\n";
+		$alarms["$file"]['perm']['gid']['old'] =  $own['name'];
+		$alarms["$file"]['perm']['gid']['new'] =  $gid;
+		chgrp($file, $gid);	
+	}
+
+}
+function check_perm_owner($file, $uid) {
+	global $alarms;
+	clearstatcache();
+
+	$own = (posix_getpwuid(fileowner($file)));
+	if($own['name'] !== $uid) {
+		print "Incorrect permission ownership detected: $file != $uid -- updating\n";
+		$alarms["$file"]['perm']['uid']['old'] =  $own['name'];
+		$alarms["$file"]['perm']['uid']['new'] =  $uid;
+		chown($file, $uid); 
+	}
+
+}
+function check_perm_bits($file, $perm) {
+
+	global $alarms;	
+	clearstatcache();
+
+	if(substr(sprintf('%o', fileperms($file)), -4) !== "$perm") {
+		//print "\nPERM: " . substr(sprintf('%o', fileperms($file)), -4) . "\n";
+		print "Incorrect permission bits detected: $file != $perm -- updating\n";
+		$alarms["$file"]['perm']['mod']['old'] =  substr(sprintf('%o', fileperms($file)), -4);
+		$alarms["$file"]['perm']['mod']['new'] =  "$perm";
+		chmod($file, octdec($perm));
+	}
 }
 
 function interact($line, $path, $filename, $line_number, $matches) {
