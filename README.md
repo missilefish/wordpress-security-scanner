@@ -1,9 +1,24 @@
 wordpress security scanner
 ==========================
 
-A PHP script to check for hacked files in a Wordpress installation. The script will read every line in every file from the origin in which you run it (the script, recursively), by default will set file and directory permissions to a relatively safe level, and alert you to issues. In the event a file is flagging, the default solution is to set the mode to '0000'. This mode makes the file useless, however it is NOT a complete solution to your problem. The intention with this script is to provide automated resolutions depending on how you implement it under CRON. 
+A PHP script to check for hacked files in a Wordpress installation. The script will read every line in every file from the origin in which you run it (the script, recursively), by default will set file and directory permissions to a relatively safe level, and alert you to issues. In the event a file is flagging, the default solution is to set the mode to '0000'. This mode makes the file useless, however it is NOT a complete solution to your problem. The intention with this script is to provide automated resolutions depending on how you implement it under CRON. The file will only be turned to mode 000 if you use --force=1 flag. 
 
-This script should be run as SUPERUSER.
+CURRENT USAGE OPTIONS:
+	--force=1 
+		This will NOT prompt you if you want to set the mode of a file to 0000
+	--prompt=1
+		This will promp you everytime a file is flagged for action
+	--lock=1 
+		Lock down all modes and owners, however still allow wp-content/uploads and any 'cache' like files or folders.
+	--unlock=1 
+		Make the entire installation capable of doing automatic updates
+
+WARNING:
+	If you run this script without a single change, your files WILL be updated with new ownership/group information, as well as chmod updates. 
+	No matter what, as of 1/6/15, your permissions will update with a LOCKDOWN policy on all files under your executing location. This will disable WP from automatic updates.
+	WP automatic updates run under the USER of every file, your web process user needs to match the script variables to run best. 
+
+This script should be run as SUPERUSER in the root crontab unless you are awesome with perms and multiuser stuff, if you are then you can help me make this better ;).
 
 This script is designed for system admins and webmasters who deal with multiple virtual hosts who have Wordpress installs. If you don't have a basic understanding of Worpdress and PHP you might want to move along.
 
