@@ -22,7 +22,7 @@ This script should be run as SUPERUSER in the root crontab unless you are awesom
 
 This script is designed for system admins and webmasters who deal with multiple virtual hosts who have Wordpress installs. If you don't have a basic understanding of Worpdress and PHP you might want to move along.
 
-If you have not moved along, then this script is a pulic share of how I manage my hundreds of virtual hosts which server WP. 
+If you have not moved along, then this script is a pulic share of how I manage my hundreds of virtual hosts which are WP instances. 
 
 This script is not perfect, it is not paticularily elegant, but it runs stand-alone and doesn't need a thing (but php). 
 
