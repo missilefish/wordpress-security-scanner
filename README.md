@@ -39,7 +39,7 @@ HOW TO:
 	Read the source and update the $wpgui and $wpui etc variables which need updating most likely 
 	Run this script fom the DOCROOT of an instance. 
 
-TODO: I know the usage statement is garbage, I just don't have much feedback on how other people have used it and I mainly run it from CRON to give me alarms. However, the script is growing, and I use it to de-secure an instance, and re-secure it after updates, while trying to maintain my end user abilities to uploads media and manage basic content (/wp-content/{etc}).
+TODO: I know the usage statement is garbage, I just don't have much feedback on how other people have used it and I mainly run it from CRON to give me alarms. However, the script is growing, and I use it to de-secure an instance, and re-secure it after updates, while trying to maintain my end user abilities to upload media and manage basic content (/wp-content/{etc}).
 
 IMPORTANT:
 
