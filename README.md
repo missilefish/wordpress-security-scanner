@@ -11,6 +11,11 @@ If you have not moved along, then this script is a pulic share of how I manage m
 
 This script is not perfect, it is not paticularily elegant, but it runs stand-alone and doesn't need a thing (but php). 
 
+HOW TO:
+
+	Read the source and update the $wpgui and $wpui etc variables which need updating most likely 
+	Run this script fom the DOCROOT of an instance. 
+
 TODO: I know the usage statement is garbage, I just don't have much feedback on how other people have used it and I mainly run it from CRON to give me alarms. However, the script is growing, and I use it to de-secure an instance, and re-secure it after updates, while trying to maintain my end user abilities to uploads media and manage basic content (/wp-content/{etc}).
 
 IMPORTANT:
