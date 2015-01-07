@@ -209,7 +209,7 @@ function check_perm($file) {
 			if(preg_match('/wp\-content\/uploads|cache/', $file)) {
 				check_perm_owner($file, $wpuid);
 				check_perm_grp($file, $wpgid);
-				check_perm_bits($file, '0660'); 
+				check_perm_bits($file, '0664'); 
 			} elseif(preg_match('/wp-config.php$/', $file)) { 
 				check_perm_owner($file, $uid);
 				check_perm_grp($file, $wpgid);
