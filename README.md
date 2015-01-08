@@ -7,9 +7,11 @@ CURRENT USAGE OPTIONS:
 
 	--force=1 
 		This will NOT prompt you if you want to set the mode of a file to 0000
+	--perms=1 
+		This will update/check all permissions and file modes (be sure to check the config variables in script)
 	--prompt=1
 		This will promp you everytime a file is flagged for action
-	--lock=1 
+	--lock=1  (must use with --perms=1)
 		Lock down all modes and owners, however still allow wp-content/uploads and any 'cache' like files or folders.
 	--unlock=1 
 		Make the entire installation capable of doing automatic updates
