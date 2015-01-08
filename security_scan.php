@@ -18,6 +18,7 @@ $interactive = 0;
 $force = 0;
 $lock = 0;
 $unlock = 0;
+$perms = 0;
 
 /* if you want to get your own notifications just update $email='your@dot.com' */
 // If you detect any new patterns please share on GIT.
@@ -30,6 +31,7 @@ $shortopts  = "";
 $shortopts .= "f::";  // Required value
 $shortopts .= "p::"; // Optional value
 $shortopts .= "l::"; // Optional value
+$shortopts .= "r::"; // Optional value
 $shortopts .= "u::"; // Optional value
 $shortopts .= "h"; // These options do not accept values
 
@@ -37,6 +39,7 @@ $longopts  = array(
     "force::",     // Required value
     "prompt::",    // Optional value
     "lock::",    // Optional value
+    "perms::",    // Optional value
     "unlock::",    // Optional value
     "help",        // No value
 );
@@ -85,7 +88,7 @@ if($lock) {
 }
 
 
-print "\nUsage: run with --force=1 or --prompt=1 to enable an interactive reporting (prompt) option or run with force to disable any detected files without prompt. Default options will only report and email findings, IN ADDITION, the default run will LOCKDOWN the file permissions.\n";
+print "\nUsage: To fix wordpress file permissions, run with --perms=1, run with --force=1 or --prompt=1 to enable an interactive reporting (prompt) option or run with force to disable any detected files without prompt. Default options will only report and email findings, IN ADDITION, the default run will LOCKDOWN the file permissions.\n";
 print "\nWarning: This script will change file permissions to the settings above for all files and directories \n         /wp-content and below will be writable by your web process $wpuid:$wpgid and all other files will be owned and only writable by $uid:$gid.\n";
 print "\nSETTINGS: -- Interactive: $interactive Force: $force Lockdown: $lock Unlock: $unlock\n\n";
 
@@ -102,6 +105,7 @@ if($force) {
 
 $path = getcwd();
 print "Getting file list and updating permissions...\n";
+if(!$perms) { print "\nNOT UPDATING PERMISSIONS. IF YOU WANT PERMISSION AUDIT/FIX RUN WITH --perms=1\n\n"; }
 $files = recursiveDirList($path);
 print "\nScanning files...";
 
@@ -193,6 +197,8 @@ function check_perm($file) {
 	global $gid;
 	global $wpuid;
 	global $wpgid;
+	global $perms;
+	if(!$perms) { return; }
 
 	if(substr(sprintf('%o', fileperms($file)), -4) !== '0000') {
 		if(is_dir($file)) {
